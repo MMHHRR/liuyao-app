@@ -786,9 +786,19 @@ function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("sidebarOverlay");
   const isMobile = window.innerWidth <= 768;
+  const isOpen = sidebar.classList.contains("open");
   sidebar.classList.toggle("open");
   if (isMobile) {
-    overlay.classList.toggle("active");
+    // 确保遮罩层与侧栏状态严格同步
+    if (isOpen) {
+      overlay.classList.remove("active");
+    } else {
+      overlay.classList.add("active");
+    }
+  }
+  // 桌面端也清理遮罩
+  if (!isMobile) {
+    overlay.classList.remove("active");
   }
 }
 

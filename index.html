@@ -211,6 +211,8 @@ body {
   z-index: 90;
 }
 .sidebar-overlay.active { display: block; }
+/* 确保遮罩层不阻止点击 */
+.sidebar-overlay:not(.active) { pointer-events: none; }
 
 /* Main content area */
 .main-content {
