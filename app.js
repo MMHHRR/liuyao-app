@@ -838,6 +838,7 @@ async function castHexagram() {
   overlay.classList.remove("active");
 
   const result = cast();
+  result._method = "随机";
   castCount++;
   document.getElementById("castCount").textContent = castCount;
 
@@ -997,6 +998,7 @@ function finalizeStepCast(yaos) {
 
   const result = { yaos, changingLines, upper:upperTri, lower:lowerTri, hexInfo,
                    changedUpper, changedLower, changedInfo };
+  result._method = _currentMethod || "随机";
 
   castCount++;
   document.getElementById("castCount").textContent = castCount;
@@ -1008,6 +1010,7 @@ function finalizeStepCast(yaos) {
 let _coinState = [1, 1, 1];
 
 function startManualCast() {
+  _currentMethod = "手摇";
   _coinState = [1, 1, 1];
   showStepOverlay('手摇起卦', '请准备三枚硬币，心中默念你所问之事。', '', false);
   document.getElementById('stepCoins').classList.remove('active');
@@ -1095,6 +1098,7 @@ function confirmCoinCast() {
 
 // ── 方法2：书页起卦 ──
 function startBookCast() {
+  _currentMethod = "书页";
   showStepOverlay('书页起卦', '从手边任意书籍中翻取页码，心中默念你所问之事。', '', false);
   document.getElementById('stepCoins').classList.remove('active');
   document.getElementById('stepCounter').style.display = 'none';
