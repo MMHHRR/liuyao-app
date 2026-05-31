@@ -381,12 +381,17 @@ ${guaText}
   const loading = document.getElementById("llmLoading");
 
   try {
-    const resp = await fetch(apiBase.replace(/\/+$/, "") + "/chat/completions", {
+    // 无自定义 Key 时走 Vercel 代理（内嵌 Key）
+    const useProxy = !apiKey;
+    const url = useProxy ? "/api/proxy" : apiBase.replace(/\/+$/, "") + "/chat/completions";
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    if (!useProxy) headers["Authorization"] = "Bearer " + apiKey;
+
+    const resp = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + apiKey,
-      },
+      headers,
       body: JSON.stringify({
         model: modelName,
         messages: [
@@ -518,9 +523,15 @@ async function sendFollowUp() {
   window._pendingRetry = { question, messages, userMsg, typing };
 
   try {
-    const resp = await fetch(apiBase.replace(/\/+$/, "") + "/chat/completions", {
+    // 无自定义 Key 时走 Vercel 代理（内嵌 Key）
+    const useProxy = !apiKey;
+    const url = useProxy ? "/api/proxy" : apiBase.replace(/\/+$/, "") + "/chat/completions";
+    const headers = { "Content-Type": "application/json" };
+    if (!useProxy) headers["Authorization"] = "Bearer " + apiKey;
+
+    const resp = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
+      headers,
       body: JSON.stringify({ model: modelName, messages, temperature: 0.7, max_tokens: 1000, stream: true }),
     });
 
