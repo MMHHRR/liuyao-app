@@ -472,10 +472,15 @@ ${guaText}
       currentResult._llmContent = fullText;
       currentResult._llmMessages = window._llmMessages;
       saveHistory();
-      // 同步到 Supabase
-      if (typeof sbUpdateLLM !== 'undefined' && currentResult._sbId) {
-        sbUpdateLLM(currentResult._sbId, fullText, window._llmMessages);
-      }
+      // 同步到 Supabase（等待 _sbId 就绪）
+      const trySync = (retries = 20) => {
+        if (currentResult._sbId && typeof sbUpdateLLM !== 'undefined') {
+          sbUpdateLLM(currentResult._sbId, fullText, window._llmMessages);
+        } else if (retries > 0) {
+          setTimeout(() => trySync(retries - 1), 200);
+        }
+      };
+      trySync();
     }
     if (loading) loading.classList.remove("active");
 
@@ -573,10 +578,16 @@ async function sendFollowUp() {
     typing.innerHTML = renderMarkdown(answer);
     window._llmMessages = messages.concat({ role: "assistant", content: answer });
     // 保存追问到历史
-    const cur = history[activeHistoryIndex];
-    if (cur) { cur._llmMessages = window._llmMessages; saveHistory();
-      if (typeof sbUpdateLLM !== 'undefined' && cur._sbId)
-        sbUpdateLLM(cur._sbId, cur._llmContent, window._llmMessages);
+    const cur2 = history[activeHistoryIndex];
+    if (cur2) { cur2._llmMessages = window._llmMessages; saveHistory();
+      const trySync = (retries = 20) => {
+        if (cur2._sbId && typeof sbUpdateLLM !== 'undefined') {
+          sbUpdateLLM(cur2._sbId, cur2._llmContent, window._llmMessages);
+        } else if (retries > 0) {
+          setTimeout(() => trySync(retries - 1), 200);
+        }
+      };
+      trySync();
     }
   } catch (e) {
     showInlineRetry(typing, '连接失败：' + e.message, question, messages);
