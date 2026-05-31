@@ -41,6 +41,7 @@ async function sbSaveHistory(result) {
   const { data, error } = await sb.from(TABLE_HISTORY).insert({
     user_id: user.id,
     hexagram_data: result,
+    method: result._method || null,
     llm_content: result._llmContent || null,
     llm_messages: result._llmMessages || null,
     created_at: new Date().toISOString()
