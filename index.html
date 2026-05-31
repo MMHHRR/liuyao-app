@@ -1803,18 +1803,30 @@ html[data-theme="light"] body {
     <button class="btn btn-method" onclick="startCardCast()">扑 克</button>
     <button class="btn btn-method" id="btnCast" onclick="castHexagram()">随 机</button>
   </div>
-  <!--
   <div class="controls-sub">
     <button class="btn btn-settings-toggle" onclick="toggleSettings()">
       ⚙ 接入 LLM
     </button>
   </div>
 
+  <!-- SETTINGS -->
   <div class="settings-panel" id="settingsPanel">
-    <h3>LLM 智能解读</h3>
+    <h3>LLM 智能解读设置</h3>
     <div class="settings-grid">
-      <div style="grid-column:1/-1;">
-        <label>启用 LLM 智能解读</label>
+      <div>
+        <label>API Key</label>
+        <input type="password" id="apiKey" placeholder="sk-..." value="">
+      </div>
+      <div>
+        <label>API Base URL</label>
+        <input type="text" id="apiBase" value="https://api.deepseek.com">
+      </div>
+      <div>
+        <label>模型名称</label>
+        <input type="text" id="modelName" value="deepseek-chat">
+      </div>
+      <div>
+        <label>启用 LLM 解读</label>
         <select id="enableLLM">
           <option value="1">启用</option>
           <option value="0">仅传统卦辞</option>
@@ -1822,7 +1834,6 @@ html[data-theme="light"] body {
       </div>
     </div>
   </div>
-  -->
 
   <!-- RESULT AREA -->
   <div id="resultArea"></div>

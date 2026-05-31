@@ -351,6 +351,9 @@ ${yaoStrs.join("\n")}
 async function callLLM(result) {
   // 保存以便重试
   window._lastLLMResult = result;
+  const apiKey = document.getElementById("apiKey").value.trim();
+  const apiBase = document.getElementById("apiBase").value.trim();
+  const modelName = document.getElementById("modelName").value.trim();
 
   const guaText = buildPromptText(result);
 
@@ -378,11 +381,19 @@ ${guaText}
   const loading = document.getElementById("llmLoading");
 
   try {
-    const resp = await fetch("/api/proxy", {
+    // 无自定义 Key 时走 Vercel 代理（内嵌 Key）
+    const useProxy = !apiKey;
+    const url = useProxy ? "/api/proxy" : apiBase.replace(/\/+$/, "") + "/chat/completions";
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    if (!useProxy) headers["Authorization"] = "Bearer " + apiKey;
+
+    const resp = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: modelName,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -503,16 +514,25 @@ async function sendFollowUp() {
   typing.textContent = "大模型思考中…";
   chat.insertBefore(typing, chat.lastElementChild);
 
+  const apiKey = document.getElementById("apiKey").value.trim();
+  const apiBase = document.getElementById("apiBase").value.trim();
+  const modelName = document.getElementById("modelName").value.trim();
   const messages = (window._llmMessages || []).concat({ role: "user", content: question });
 
   // 保存以备重试
   window._pendingRetry = { question, messages, userMsg, typing };
 
   try {
-    const resp = await fetch("/api/proxy", {
+    // 无自定义 Key 时走 Vercel 代理（内嵌 Key）
+    const useProxy = !apiKey;
+    const url = useProxy ? "/api/proxy" : apiBase.replace(/\/+$/, "") + "/chat/completions";
+    const headers = { "Content-Type": "application/json" };
+    if (!useProxy) headers["Authorization"] = "Bearer " + apiKey;
+
+    const resp = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "deepseek-chat", messages, temperature: 0.7, max_tokens: 1000, stream: true }),
+      headers,
+      body: JSON.stringify({ model: modelName, messages, temperature: 0.7, max_tokens: 1000, stream: true }),
     });
 
     if (!resp.ok) {
