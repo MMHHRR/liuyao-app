@@ -1001,17 +1001,50 @@ body {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 640px) {
-  .main-content { padding: 12px 10px 40px; }
-  .header h1 { font-size: 1.5rem; letter-spacing: 4px; }
+  .main-content { padding: 8px 8px 40px; }
+  .header { padding: 24px 0 16px; }
+  .header h1 { font-size: 1.3rem; letter-spacing: 4px; }
+  .header .subtitle { font-size: 0.72rem; }
+  .header::after { margin: 12px auto 0; width: 40px; }
   .hexagram-columns { flex-direction: column; }
-  .hexagram-column { padding: 20px 16px; }
-  .btn-cast { padding: 10px 20px; font-size: 0.85rem; letter-spacing: 3px; }
+  .hexagram-column { padding: 16px 12px; }
+  .btn-cast { padding: 12px 16px; font-size: 0.85rem; letter-spacing: 3px; }
   .settings-panel.open { padding: 16px; }
-  .controls { gap: 10px; margin: 20px 0 16px; }
-  .controls .btn { flex: 1; min-width: 0; padding: 10px 6px; font-size: 0.82rem; letter-spacing: 1px; }
+  .controls { gap: 8px; margin: 16px 0 12px; }
+  .controls .btn { flex: 1; min-width: 0; padding: 12px 4px; font-size: 0.8rem; letter-spacing: 1px; border-radius: 6px; }
   .sidebar-toggle, .btn-theme-toggle { width: 40px; height: 40px; font-size: 1.1rem; }
-  .btn-theme-toggle { top: 12px; right: 8px; }
-  .sidebar-toggle { top: 12px; left: 8px; }
+  .btn-theme-toggle { top: 8px; right: 6px; }
+  .sidebar-toggle { top: 8px; left: 6px; }
+  .step-modal { padding: 20px 16px; max-width: 100%; width: 94%; border-radius: 10px; }
+  .step-prompt { font-size: 0.9rem; }
+  .step-result { font-size: 0.85rem; padding: 12px; }
+  .coins-row { gap: 10px; }
+  .coin-btn { width: 80px; height: 80px; font-size: 0.85rem; }
+  .input-row input { width: 60px; height: 40px; font-size: 0.9rem; }
+  .hexagram-column .hexagram-art { gap: 2px; }
+  .yao-bar { width: 80px !important; }
+  .visual-yao { min-width: 80px; }
+  .changing-arrow { font-size: 0.8rem; padding: 8px; }
+  .static-card { font-size: 0.82rem; padding: 10px 12px; }
+  .llm-section { padding: 12px; }
+  .llm-content { font-size: 0.82rem; padding: 12px; }
+  .history-bar { font-size: 0.78rem; padding: 8px 12px; }
+  .toss-animation { width: 100px; height: 100px; font-size: 2.5rem; }
+}
+
+@media (max-width: 480px) {
+  .controls { gap: 6px; }
+  .controls .btn { padding: 10px 2px; font-size: 0.7rem; letter-spacing: 0; }
+  .sidebar-header { padding: 12px 10px 8px; }
+  .sidebar-header h2 { font-size: 0.78rem; }
+  .sidebar-item { padding: 8px 10px; }
+  .step-modal { padding: 16px 12px; }
+  .coin-btn { width: 66px; height: 66px; font-size: 0.78rem; }
+  .input-row input { width: 50px; height: 36px; font-size: 0.82rem; }
+  .yao-bar { width: 60px !important; }
+  .visual-yao { min-width: 60px; }
+  .hexagram-column .hexagram-info { padding: 10px; }
+  .hexagram-column .hexagram-info p { font-size: 0.78rem; }
 }
 
 /* ===== METHOD BUTTONS ===== */
@@ -1582,6 +1615,9 @@ html[data-theme="light"] body {
 /* hidden elements */
 .controls-sub { display: none !important; }
 .settings-panel { display: none !important; }
+
+/* mobile tap improvements */
+.btn, .sidebar-toggle, .btn-theme-toggle, .sidebar-item, .step-close-btn, .coin-btn, .coin-confirm-btn, .llm-chat-btn, .ref-toggle, .sidebar-clear-btn { touch-action: manipulation; }
 [data-theme="light"] .hexagram-art .yao-broken span { background: #c0392b; }
 [data-theme="light"] .hexagram-info .info-content {
   color: #2c2218;
