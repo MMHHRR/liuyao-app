@@ -1,0 +1,7 @@
+services:
+  liuyao:
+    build: .
+    ports:
+      - "8080:80"
+    container_name: liuyao
+    restart: unless-stopped
