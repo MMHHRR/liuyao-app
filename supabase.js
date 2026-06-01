@@ -58,7 +58,7 @@ async function sbLoadHistory() {
   if (!user) return [];
   const { data, error } = await sb.from(TABLE_HISTORY).select("*").eq("user_id", user.id).order("created_at", { ascending: false });
   if (error) { console.warn("Supabase load failed:", error.message); return []; }
-  return data.map(row => ({ ...row.hexagram_data, _sbId: row.id, _sbSynced: true, _llmContent: row.llm_content, _llmMessages: row.llm_messages }));
+  return data.map(row => ({ ...row.hexagram_data, _sbId: row.id, _sbSynced: true, _llmContent: row.llm_content, _llmMessages: row.llm_messages, _sbCreatedAt: row.created_at }));
 }
 
 async function sbUpdateLLM(sbId, llmContent, llmMessages) {

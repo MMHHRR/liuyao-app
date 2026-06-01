@@ -720,16 +720,31 @@ function loadHistory() {
       document.getElementById("historyCount").textContent = history.length;
     }
   } catch(e) {}
-  // 后台从 Supabase 同步
+  // 后台从 Supabase 同步（合并，不覆盖本地）
   if (typeof sbLoadHistory !== 'undefined') {
     sbLoadHistory().then(remote => {
       if (remote && remote.length > 0) {
-        // sbLoadHistory 已返回倒序（最新在前），直接使用
-        history = remote;
-        activeHistoryIndex = 0;
-        renderHistoryList();
-        document.getElementById("historyCount").textContent = history.length;
-        saveHistory();
+        // 如果用户曾清空记录，过滤掉清空之前的云端数据
+        const clearedAt = parseInt(localStorage.getItem("liuyao-cleared-at") || "0", 10);
+        if (clearedAt > 0) {
+          remote = remote.filter(r => {
+            const t = new Date(r._sbCreatedAt || r._time).getTime();
+            return t > clearedAt;
+          });
+        }
+        // 用 _sbId 去重：本地已有的保留，新增的补充进来
+        const localIds = new Set();
+        history.forEach(h => { if (h._sbId) localIds.add(h._sbId); });
+        const newItems = remote.filter(r => !localIds.has(r._sbId));
+        if (newItems.length > 0) {
+          history = history.concat(newItems);
+          // 统一约定：history[0] = 最新
+          history.sort((a, b) => (b._seq || 0) - (a._seq || 0));
+          activeHistoryIndex = 0;
+          renderHistoryList();
+          document.getElementById("historyCount").textContent = history.length;
+          saveHistory();
+        }
       }
     });
   }
@@ -787,7 +802,10 @@ function clearHistory() {
   if (!confirm("确定要清空所有占卜记录吗？")) return;
   history = [];
   activeHistoryIndex = -1;
-  try { localStorage.removeItem("liuyao-history"); } catch(e) {}
+  try {
+    localStorage.removeItem("liuyao-history");
+    localStorage.setItem("liuyao-cleared-at", Date.now().toString());
+  } catch(e) {}
   renderHistoryList();
   document.getElementById("historyCount").textContent = "0";
   document.getElementById("resultArea").innerHTML = "";
