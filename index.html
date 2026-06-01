@@ -10,14 +10,22 @@
 html { scroll-behavior: smooth; }
 body {
   font-family: 'Noto Serif SC', 'STKaiti', 'KaiTi', 'Source Han Serif SC', serif;
-  background: #0d1117;
+  background: #0a0e14;
   color: #e6edf3;
   min-height: 100vh;
   line-height: 1.75;
-  background-image:
-    radial-gradient(ellipse at 15% 40%, rgba(100,50,20,0.06) 0%, transparent 55%),
-    radial-gradient(ellipse at 85% 15%, rgba(60,40,80,0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 85%, rgba(120,80,30,0.03) 0%, transparent 50%);
+  overflow-x: hidden;
+}
+
+/* ===== PARTICLE CANVAS ===== */
+#particleCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
 }
 
 /* ===== SCROLLBAR ===== */
@@ -30,6 +38,8 @@ body {
 .app-wrapper {
   display: flex;
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
 /* ===== SIDEBAR ===== */
@@ -48,8 +58,18 @@ body {
 }
 .sidebar-header {
   padding: 20px 16px 12px;
-  border-bottom: 1px solid #30363d;
+  border-bottom: 1px solid rgba(48,54,61,0.6);
   text-align: center;
+  position: relative;
+}
+.sidebar-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(247,129,102,0.2), transparent);
 }
 .sidebar-header h2 {
   font-size: 0.85rem;
@@ -277,7 +297,7 @@ body {
 .header::after {
   content: '';
   display: block;
-  width: 60px;
+  width: 80px;
   height: 1px;
   background: linear-gradient(90deg, transparent, #f78166, transparent);
   margin: 20px auto 0;
@@ -302,7 +322,7 @@ body {
   font-weight: 500;
   color: #f78166;
   letter-spacing: 8px;
-  text-shadow: 0 0 30px rgba(201,169,110,0.06);
+  text-shadow: 0 0 40px rgba(247,129,102,0.12), 0 0 80px rgba(247,129,102,0.06);
 }
 .header .subtitle {
   font-size: 0.85rem;
@@ -335,23 +355,24 @@ body {
   padding: 12px 28px;
   font-size: 0.95rem;
   letter-spacing: 4px;
-  box-shadow: 0 0 20px rgba(218,54,51,0.12), 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow: 0 0 24px rgba(218,54,51,0.15), 0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
   position: relative;
   overflow: hidden;
-  border: none;
+  border: 1px solid rgba(218,54,51,0.25);
   transition: all 0.3s ease;
 }
 .btn-cast::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.03) 50%, transparent 60%);
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.05) 50%, transparent 60%);
   pointer-events: none;
 }
 .btn-cast:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(218,54,51,0.2), 0 6px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 0 40px rgba(218,54,51,0.25), 0 8px 28px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
   color: #ffffff;
+  border-color: rgba(218,54,51,0.4);
 }
 .btn-cast:active {
   transform: translateY(0);
@@ -533,11 +554,16 @@ body {
 .hexagram-column {
   flex: 1;
   min-width: 0;
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(22,27,34,0.8), rgba(13,17,23,0.5));
+  border: 1px solid rgba(48,54,61,0.6);
+  border-radius: 12px;
   padding: 24px 20px;
-  box-shadow: 0 1px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 24px rgba(0,0,0,0.35), 0 0 1px rgba(247,129,102,0.08);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.hexagram-column:hover {
+  border-color: rgba(247,129,102,0.15);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.4), 0 0 1px rgba(247,129,102,0.12);
 }
 .hexagram-column--enter {
   opacity: 0;
@@ -1805,6 +1831,8 @@ html[data-theme="light"] body {
 </head>
 <body>
 
+<canvas id="particleCanvas"></canvas>
+
 <div class="app-wrapper">
 
   <!-- SIDEBAR TOGGLE (mobile) -->
@@ -1965,5 +1993,84 @@ html[data-theme="light"] body {
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script src="app.js?v=2"></script>
+
+<!-- 粒子背景 -->
+<script>
+(function() {
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let w, h;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const COUNT = 60;
+  for (let i = 0; i < COUNT; i++) {
+    particles.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 2 + 0.5,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.3,
+      a: Math.random() * 0.4 + 0.1,
+      pulse: Math.random() * Math.PI * 2,
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw connections
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(247,129,102,${(1 - dist / 150) * 0.08})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw particles
+    for (const p of particles) {
+      const pulseA = p.a * (0.6 + 0.4 * Math.sin(p.pulse));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(247,129,102,${pulseA})`;
+      ctx.fill();
+
+      // Glow
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(247,129,102,${pulseA * 0.15})`;
+      ctx.fill();
+
+      p.x += p.dx;
+      p.y += p.dy;
+      p.pulse += 0.01;
+
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
+</script>
 </body>
 </html>
