@@ -689,8 +689,8 @@ function addToHistory(result) {
     month: "2-digit", day: "2-digit",
     hour: "2-digit", minute: "2-digit",
   });
-  history.push(result);
-  activeHistoryIndex = history.length - 1;
+  history.unshift(result);
+  activeHistoryIndex = 0;
   renderHistoryList();
   document.getElementById("historyCount").textContent = history.length;
   saveHistory();
@@ -713,7 +713,9 @@ function loadHistory() {
     const saved = localStorage.getItem("liuyao-history");
     if (saved) {
       history = JSON.parse(saved);
-      activeHistoryIndex = history.length - 1;
+      // 统一约定：history[0] = 最新（按 _seq 倒序）
+      history.sort((a, b) => (b._seq || 0) - (a._seq || 0));
+      activeHistoryIndex = 0;
       renderHistoryList();
       document.getElementById("historyCount").textContent = history.length;
     }
@@ -722,8 +724,9 @@ function loadHistory() {
   if (typeof sbLoadHistory !== 'undefined') {
     sbLoadHistory().then(remote => {
       if (remote && remote.length > 0) {
+        // sbLoadHistory 已返回倒序（最新在前），直接使用
         history = remote;
-        activeHistoryIndex = history.length - 1;
+        activeHistoryIndex = 0;
         renderHistoryList();
         document.getElementById("historyCount").textContent = history.length;
         saveHistory();
@@ -747,7 +750,7 @@ function renderHistoryList(highlightId) {
 
   const activeId = highlightId !== undefined ? highlightId : activeHistoryIndex;
   let html = "";
-  for (let i = history.length - 1; i >= 0; i--) {
+  for (let i = 0; i < history.length; i++) {
     const h = history[i];
     const hasChange = h.changingLines.length > 0;
     const badge = hasChange
